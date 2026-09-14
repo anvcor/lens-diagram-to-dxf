@@ -1,0 +1,48 @@
+{
+ "pxmm": 40.0,
+ "total_length_mm": 18.719,
+ "surfaces": [
+  {
+   "R": 22.014,
+   "semi": 9.0,
+   "stop": false,
+   "D": 3.259
+  },
+  {
+   "R": -435.76,
+   "semi": 9.0,
+   "stop": false,
+   "D": 6.008
+  },
+  {
+   "R": -22.213,
+   "semi": 6.5,
+   "stop": false,
+   "D": 1.0
+  },
+  {
+   "R": 20.291,
+   "semi": 6.5,
+   "stop": false,
+   "D": 4.75
+  },
+  {
+   "R": null,
+   "semi": 5.2,
+   "stop": true,
+   "D": 0.75
+  },
+  {
+   "R": 79.684,
+   "semi": 8.0,
+   "stop": false,
+   "D": 2.952
+  },
+  {
+   "R": -18.395,
+   "semi": 8.0,
+   "stop": false,
+   "D": 0.0
+  }
+ ]
+}
