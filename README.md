@@ -82,13 +82,23 @@ python3 scripts/fit_check.py lens.json diagram_crop.png
 scripts/diag_extract.py   图 → lens.json（+ 叠加图、分片调试图）
 scripts/diag_build.py     lens.json → xlsx / dxf / seq / spec.json
 scripts/fit_check.py      验收：拟合弧压回原图逐行量偏差
+scripts/asph_from_diagram.py  专利缺非球面系数时：用印刷 R/D 标定结构图，量非球面偏离并拟合偶次系数初值
 SKILL.md                  完整流程、算法说明、踩过的坑（也是一个 Claude skill）
 examples/demo/            合成示例 + 往返精度自测
 examples/sigma85/         真实案例：适马 85mm F1.2
+examples/zhongyi35_cn120215088/  专利还原：中一 35mm F1.4，专利缺非球面系数 → 图测初值 → CODE V → 人工修正
 ```
 
 `SKILL.md` 本身是一个 [Claude Code](https://claude.com/claude-code) skill：把整个目录放进
 skills 目录，描述这类活的时候就会自动触发。当然脚本也可以完全脱离 Claude 单独用。
+
+## 专利还原模式（专利缺非球面系数）
+
+专利面表印全了、唯独没印非球面系数时，专利结构图往往是 CAD 按比例导出的：用印刷 R/D 把图标定到
+≈0.03 mm，再逐行量非球面墨线偏离「印刷顶点球面」多少，拟合出偶次系数当初值
+（`scripts/asph_from_diagram.py`）。之后**只用 INF 一个组态**优化初始结构，再交给设计者在 CODE V 里
+用一个简短的约束宏手工修正：球面 RDY ±5%，非球面顶点 R 同号且 |R| 30..500，宏里不设变量。
+完整流程和踩过的坑见 [`examples/zhongyi35_cn120215088/`](examples/zhongyi35_cn120215088/) 和 SKILL.md §6。
 
 ## 局限
 

@@ -1,0 +1,24 @@
+! CIR_axial.seq -- set every surface clear aperture (CIR) to the on-axis
+! full-pupil ray height: |Y| of R2 (upper marginal, pupil Y=+1) and R3
+! (lower marginal, Y=-1) of F1 in Z1, the larger of the two, times ^fac.
+! CIR is not an AUT variable, so this is a setup step: run it before AUT
+! (and again after AUT if the radii changed a lot).
+! Off-axis beams are wider than the axial beam on the front/rear groups, so
+! applying it to ALL surfaces vignettes the outer fields completely; use the
+! surface range ^s1..^s2 (e.g. only around the stop).
+
+LCL NUM ^k ^h ^h3 ^fac ^s1 ^s2
+^fac == 1.0          ! aperture margin, e.g. 1.02 for +2%
+^s1  == 1            ! first surface
+^s2  == (NUM S)-1    ! last surface (image excluded)
+
+FOR ^k ^s1 ^s2
+   ^h  == ABSF((Y R2 S^k F1 Z1))
+   ^h3 == ABSF((Y R3 S^k F1 Z1))
+   IF ^h3 > ^h
+      ^h == ^h3
+   END IF
+   CIR S^k ^h*^fac
+END FOR
+
+!SET VIG   ! only when the range leaves room for the off-axis beams

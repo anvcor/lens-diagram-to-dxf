@@ -1,0 +1,6 @@
+! aspheric start values measured from the diagram (K=0, even terms)
+! surface numbers = position in presc.json (1..N); check against your CODE V numbering
+ASP S16; K S16 0; A S16 1.236481e-06; B S16 -3.986163e-08; C S16 1.122995e-10   ! presc id 17, edge dz +0.013 mm @ h=18.0
+ASP S17; K S17 0; A S17 2.203652e-06; B S17 3.963057e-09; C S17 -7.489325e-12   ! presc id 18, edge dz +0.284 mm @ h=18.0
+ASP S27; K S27 0; A S27 -4.198409e-05; B S27 -2.678919e-07; C S27 1.302527e-09   ! presc id 28, edge dz -1.445 mm @ h=16.4
+ASP S28; K S28 0; A S28 -5.781025e-05; B S28 1.743088e-07; C S28 -1.171271e-10   ! presc id 29, edge dz -1.410 mm @ h=16.5
