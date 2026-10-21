@@ -4,3 +4,4 @@ pillow>=9.0
 openpyxl>=3.1
 ezdxf>=1.1
 cairosvg>=2.7   # 只有输入是 SVG 时才需要
+pywin32>=306; sys_platform == "win32"   # 只有自动优化流水线（CODE V COM）需要

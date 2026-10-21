@@ -36,7 +36,22 @@ def outline_mask(d, arr):
     cols = d.get('colors') or {}
     lab, cent = quantize(arr, len(cols) or 6, 28)
     fill = {e['color'] for e in d['elements']} | {d.get('bg', 0)}
-    return np.isin(lab, [c for c in range(len(cent)) if c not in fill])
+    om = np.isin(lab, [c for c in range(len(cent)) if c not in fill])
+    dc = d.get('dark_cement') or 0
+    if dc:
+        # 胶合线画成背景色：两侧都是镜片填充、宽度 ≤ dark_cement+2 的背景段也算描边（取线中心，不是两侧灰边）
+        glass = np.isin(lab, list({e['color'] for e in d['elements']}))
+        bgm = lab == d.get('bg', 0)
+        for y in range(lab.shape[0]):
+            xs = np.where(bgm[y])[0]
+            if xs.size == 0: continue
+            for run in np.split(xs, np.where(np.diff(xs) > 1)[0] + 1):
+                s, e = run[0], run[-1]
+                # 两侧抗锯齿过渡带常有 3 px，往外看 6 px 找填充
+                if e - s + 1 <= dc and s >= 6 and e + 6 < lab.shape[1] \
+                        and glass[y, s - 6:s].any() and glass[y, e + 1:e + 7].any():
+                    om[y, s:e + 1] = True
+    return om
 
 
 def main():
@@ -73,10 +88,13 @@ def main():
             cc = cen[yy]
             if not cc: continue
             m = min(cc, key=lambda q: abs(q - xp))
-            if abs(m - xp) < 25: ds.append(m - xp)
-        ds = np.array(ds) if ds else np.array([0.0])
+            if abs(m - xp) < 25: ds.append((yy, m - xp))
+        rows_ = [r for r, _ in ds]
+        ds = np.array([v for _, v in ds]) if ds else np.array([0.0])
         tot.append(np.abs(ds).mean())
         flag = '  ←偏大' if np.abs(ds).mean() > 1.5 else ''
+        if a.verbose and flag:
+            print('     行:偏差 ' + ' '.join(f'{r}:{v:+.1f}' for r, v in zip(rows_, ds)))
         print(f'{k:>3} {("INF" if R is None else f"{R:.2f}"):>10} {semi:>7.2f} '
               f'{np.abs(ds).mean():>7.2f} {np.abs(ds).max():>7.2f}{flag}')
     print(f'\n全部面平均 {np.mean(tot):.2f} px = {np.mean(tot)/px*1000:.0f} µm'

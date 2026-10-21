@@ -83,6 +83,11 @@ scripts/diag_extract.py   图 → lens.json（+ 叠加图、分片调试图）
 scripts/diag_build.py     lens.json → xlsx / dxf / seq / spec.json
 scripts/fit_check.py      验收：拟合弧压回原图逐行量偏差
 scripts/asph_from_diagram.py  专利缺非球面系数时：用印刷 R/D 标定结构图，量非球面偏离并拟合偶次系数初值
+scripts/start_fix.py      自动优化第 1 级：玻璃占位的面数据 → 光线追得通、像差初步收敛的起点
+scripts/cv_opt.py         第 2 级：CODE V AUT（生成 _setup.seq 设变量 + _aut.seq 纯约束宏）
+scripts/cv_snap.py        第 3 级：虚拟玻璃逐片吸附到真实牌号
+scripts/run_all.py        三级一步跑完；viewer.py / live.py 浏览器里实时看；layout_png.py 叠回原图
+scripts/cv_session.py     CODE V COM 薄封装（Windows + CODE V + pywin32）
 SKILL.md                  完整流程、算法说明、踩过的坑（也是一个 Claude skill）
 examples/demo/            合成示例 + 往返精度自测
 examples/sigma85/         真实案例：适马 85mm F1.2
@@ -99,6 +104,26 @@ skills 目录，描述这类活的时候就会自动触发。当然脚本也可�
 （`scripts/asph_from_diagram.py`）。之后**只用 INF 一个组态**优化初始结构，再交给设计者在 CODE V 里
 用一个简短的约束宏手工修正：球面 RDY ±5%，非球面顶点 R 同号且 |R| 30..500，宏里不设变量。
 完整流程和踩过的坑见 [`examples/zhongyi35_cn120215088/`](examples/zhongyi35_cn120215088/) 和 SKILL.md §6。
+
+## 黑底剖面图的胶合线
+
+尼康官网、DC Watch 那种黑镜筒剖面图，胶合线画成背景色（白片之间一条黑线），默认的胶合判据永远不成立，
+胶合面会被拆成假空气间隔。加 `--dark-cement <线宽+1>`（3× 放大后一般取 5）即可。
+实测尼康 AF-S 58mm f/1.4G：9 片 15 面，全部面平均偏差 0.91 px ≈ 38 µm，详见 SKILL.md。
+
+## 自动优化流水线（可选，Windows + CODE V）
+
+```bash
+python scripts/run_all.py SIGMA85.xlsx --efl 85 --fno 1.25 --ih 21.6
+python scripts/viewer.py <目录>     # http://localhost:8765 实时看
+```
+共三级：起点修复 → CODE V AUT → 吸附真实玻璃。第 2 级写出的约束宏照手工写法：
+- 球面：RDY ±5%；
+- 非球面：顶点 RDY 同号，|R| 在 30..500；
+- 宏里不设变量，变量另放在 `_setup.seq`；
+- 只做 INF。
+
+见 SKILL.md §7。
 
 ## 局限
 

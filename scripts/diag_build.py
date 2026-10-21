@@ -142,8 +142,13 @@ def build_dxf(d, path, image=None, jpeg=True, fade=50):
             safe = stem + '.jpg'
             im = _Im.open(image)
             if im.mode != 'RGB': im = im.convert('RGB')
-            im.save(os.path.join(outdir, safe), 'JPEG', quality=92, subsampling=0)
-            print(f'  贴图已转存为 {safe}（AutoCAD 读 PNG 常报「不可读」，JPEG 最稳）')
+            try:
+                im.save(os.path.join(outdir, safe), 'JPEG', quality=92, subsampling=0)
+                print(f'  贴图已转存为 {safe}（AutoCAD 读 PNG 常报「不可读」，JPEG 最稳）')
+            except PermissionError:
+                # AutoCAD 开着这张 DXF 时会锁住贴图；底图没变就沿用旧文件，不影响 DXF 本身重写
+                if not os.path.exists(os.path.join(outdir, safe)): raise
+                print(f'  [提示] {safe} 被占用（AutoCAD 开着？），沿用已有的贴图文件')
         else:
             safe = stem + os.path.splitext(base)[1]
             if safe != base:

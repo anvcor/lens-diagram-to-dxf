@@ -125,7 +125,13 @@ def fit_surface(xs, ys, ay, side, flat_span=2.5, seed_frac=0.5, tol_min=1.5):
     # 取 99 分位而不是最大值：机械磨边那一两行偶尔会落进容差里，用最大值会让弧多画出去一截
     semi_fit = float(np.percentile(np.abs(ys[inl] - ay), 99))
     if span < flat_span:
-        return dict(R=None, vertex=float(np.median(xs[inl])), rms=0.0, flat=True,
+        # 平面：入选点要按「竖直线」重新挑，不能沿用种子圆的外推——近乎平直的种子拟出的圆是噪声，
+        # 外推到边缘会偏出容差，把真实平面截短（58/1.4G 的 L5 后表面：画满 16 mm，只认到 10.9 mm）。
+        # 磨边台阶是横向跳变，离竖直线远，照样留在外面。
+        xm = float(np.median(xs[inl]))
+        inl = seed | (np.abs(xs - xm) <= flat_span + 1.0)
+        semi_fit = float(np.percentile(np.abs(ys[inl] - ay), 99))
+        return dict(R=None, vertex=xm, rms=0.0, flat=True,
                     n=int(inl.sum()), span=span, semi_fit=semi_fit)
     vertex = cx - R if left else cx + R
     signed = R if cx > vertex else -R
@@ -146,6 +152,9 @@ def main():
     ap.add_argument('--pxmm', type=float, help='每 mm 像素数')
     ap.add_argument('--flip', action='store_true', help='物方在右侧时先水平翻转')
     ap.add_argument('--cement-gap', type=float, default=None, help='判为胶合的最大顶点间隙 (px)，默认 2*line_dilate+2')
+    ap.add_argument('--dark-cement', type=float, default=0,
+                    help='胶合线画成背景色（如黑底图里的黑色胶合线）时用：两片间隙 ≤ 此值(px) 且两侧半径一致即判胶合，'
+                         '不再要求间隙里没有背景像素；面位置取两侧中点=线中心')
     ap.add_argument('--overlay', help='叠加核对图输出路径')
     ap.add_argument('--bg', help='强制背景色 R,G,B')
     ap.add_argument('--min-frac', type=float, default=0.05, help='分片最小面积占其所在镜片整体的比例')
@@ -359,7 +368,8 @@ def main():
     def cemented(pa, pb):
         """pa 的后面与 pb 的前面是否胶合：顶点距离小，且两顶点之间靠近光轴的几行里没有背景像素。"""
         v1, v2 = pa['back']['vertex'], pb['front']['vertex']
-        if not (-3 < v2 - v1 < a.cement_gap): return False
+        dark = a.dark_cement > 0 and -3 < v2 - v1 <= a.dark_cement
+        if not (dark or -3 < v2 - v1 < a.cement_gap): return False
         # 胶合面两侧拟合出的半径必须一致；符号相反或相差 >30% 的是极薄空气间隔（如 0.15 mm）
         R1, R2 = pa['back']['R'], pb['front']['R']
         if (R1 is None) != (R2 is None): return False
@@ -367,7 +377,7 @@ def main():
             print(f'[提示] x≈{v1:.0f} 两侧半径 {R1 / pxmm_hint:.1f} / {R2 / pxmm_hint:.1f} 不一致 → 按极薄空气间隔处理', file=sys.stderr)
             return False
         c0, c1 = int(round(min(v1, v2))) + 1, int(round(max(v1, v2)))
-        if c1 <= c0: return True
+        if c1 <= c0 or dark: return True
         r0 = int(ay) + (a.bridge // 2 + 3)
         rows = np.r_[max(0, int(ay) - (a.bridge // 2 + 6)): max(0, int(ay) - (a.bridge // 2 + 2)),
                      min(H, r0): min(H, r0 + 4)]
@@ -464,6 +474,7 @@ def main():
                 surfaces[k_ + 1]['asph_by_tag'] = True
             s_['asph_by_tag'] = True
     out = dict(image=a.image, crop=a.crop, flip=a.flip, pxmm=pxmm, axis_px=ay, W=W, H=H, bg=bg, tags=tags,
+               dark_cement=a.dark_cement,
                stop_semi_px=[(st['y1'] - st['y0']) / 2 for st in stops],
                total_length_mm=round(mm(v_last - v_first), 3),
                colors={int(c): [int(v) for v in cent[c]] for c in range(a.k)},
