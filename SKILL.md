@@ -1,6 +1,6 @@
 ---
 name: lens-diagram-to-dxf
-description: "把镜头结构图（厂商官网/说明书里的 Lens Construction 图，PNG/JPG/SVG）反推成逐面数据：自动找光轴、分出每片镜片、按圆心落在光轴上做圆弧拟合，输出 Excel 面数据表（面序号/面型/曲率半径/THICKNESS/玻璃占位 BSC7/HR·ED·ASPH 标记/半口径）+ AutoCAD DXF（光轴、各面 ARC、边缘线、光阑、标注，原图按比例贴底）+ 可选最简 CODE V .seq。凡是用户丢一张镜头剖面/结构图并想要「画成 CAD」「转 dxf」「读出半径/厚度」「做成表格/excel」「反推镜头数据」「描一下这个镜头」，或提到 55EVO 这种从图反推的历史项目，都用这个 skill。专利里的数据表格提取不归这里（那是 patent-lens-to-excel）；但**专利印了 R/D 却缺非球面系数**时，用这里的 asph_from_diagram.py 从专利结构图量非球面初值，再按「专利还原模式」做 CODE V 初始结构并交给人工修正。"
+description: "把镜头结构图（厂商官网/说明书里的 Lens Construction 图，PNG/JPG/SVG）反推成逐面数据：自动找光轴、分出每片镜片、按圆心落在光轴上做圆弧拟合，输出 Excel 面数据表（面序号/面型/曲率半径/THICKNESS/玻璃占位 BSC7/HR·ED·ASPH 标记/半口径）+ AutoCAD DXF（光轴、各面 ARC、边缘线、光阑、标注，原图按比例贴底）+ 可选最简 CODE V .seq。凡是用户丢一张镜头剖面/结构图并想要「画成 CAD」「转 dxf」「读出半径/厚度」「做成表格/excel」「反推镜头数据」「描一下这个镜头」，或提到 55EVO 这种从图反推的历史项目，都用这个 skill。专利里的数据表格提取不归这里（那是 patent-lens-to-excel）；但**专利印了 R/D 却缺非球面系数**时，用这里的 asph_from_diagram.py 从专利结构图量非球面初值，再按「专利还原模式」做 CODE V 初始结构并交给人工修正。结构图几何已定、要按厂商官方 MTF 反求玻璃牌号 / 非球面 / 后截距并出 CODE V 交付件时，用这里的 restore/ 还原优化器（§8）。"
 ---
 
 # 镜头结构图 → DXF + Excel
@@ -183,6 +183,40 @@ python $S/viewer.py <目录>          # 另开一个终端，浏览器 http://lo
 - 边厚：在固定高度上用 SAGF 算的 @E。
 
 手工接着调的时候：`in <o>_setup.seq`（或者自己设变量）→ 改 `<o>_aut.seq` 里的数字 → `in <o>_aut.seq`。
+
+## 8. 还原优化器 restore/：按官方 MTF 反求玻璃、非球面和后截距（不需要 CODE V 也能搜）
+
+§7 解决的是「光线追得通」。要把结构图做成**贴合厂商官方 MTF 的还原镜头**，用 `restore/`：
+
+- 几何锁定在图上；
+- 求每片的真实牌号、可变非球面的系数、后截距；
+- 约束：EFL 窗口、焦点、CRA、RI、矢高框、玻璃规则。
+
+完整说明见 `restore/README.md`，实例见 `examples/sigma50cl/`。
+```bash
+python restore/tools/config_from_seq.py start.seq --out examples/<lens>/config.json --name <lens> --image-height 21.6
+#   起草 config，然后逐项核对：固定牌号、非球面范围和矢高表、玻璃规则 / 模式、limits、视场、光阑口径
+#   官方 MTF 图数字化成 examples/<lens>/mtf_official.json
+python restore/run_pipeline.py --config examples/<lens>/config.json --out runs/<lens>_smoke --smoke   # 先冒烟
+python restore/run_pipeline.py --config examples/<lens>/config.json --out runs/<lens>_r1 --codev      # 正式
+python restore/deliver.py runs/<lens>_r1/<mode>_t.jsonl --rank 0 --out <交付目录>/<Lens>_INF         # 单独出交付件
+python restore/cvtools.py finalize <交付目录> <Lens>_INF ; python restore/cvtools.py mtf <交付目录>/<Lens>_INF.len
+```
+规矩：
+- **只做 INF**。对焦组态交给设计者加。
+- **选方案以 CODE V 复核为准**（`--codev` / `cvtools.py rank`）。求解器每个视场只有 91 或 217 条光线，排序可能和 CODE V 不同。
+- 交付规格：
+  - `FNO` 定孔径，光阑不设半径；
+  - 视场 `YRI` 取到像高；
+  - setvig 渐晕；
+  - 各视场 R1..R5 无光线失败；
+  - CRA、RI 达到 config 的限值。
+- `_opt.seq` 照 §6.4 的写法：只有约束、不设变量；球面 RDY ±5%，非球面顶点 |R| 30..500。
+  出了交付件就交给设计者收尾。
+- 玻璃目录（AGF）不进仓库，放 `restore/glass_catalog/` 或设 `LENS_GLASS_DIR`。
+- 有 CODE V 时跑一次 `tools/glassmodel.py sample` / `tools/glassmodel.py fit`，虚构玻璃就和 CODE V 的 GLC 一致。
+- Rust 引擎：`bash restore/rust/build.sh`，产物不进仓库，没有就自动用 torch。
+- 改了求解器核心，跑 `restore/tests/check_sigma50.py`，要和原适马求解器逐位一致。
 
 ## 算法（改脚本前先读这段）
 1. k-means 6 类颜色 → 合并相近中心；最大类=背景；3×3 开运算能抹掉 >60% 像素的类=线条类（描边、光阑、光轴线、文字）。

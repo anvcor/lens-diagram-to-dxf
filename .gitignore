@@ -1,3 +1,10 @@
 __pycache__/
 *.pyc
 *.bak
+# restore/: local glass catalogs, CODE V fitted glass model, built Rust engine, run outputs
+restore/glass_catalog/
+glassmodel_cv*.json
+restore/rust/lenscore/target/
+*.dll
+*.so
+runs/

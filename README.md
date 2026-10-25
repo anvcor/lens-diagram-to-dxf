@@ -88,10 +88,12 @@ scripts/cv_opt.py         第 2 级：CODE V AUT（生成 _setup.seq 设变量 +
 scripts/cv_snap.py        第 3 级：虚拟玻璃逐片吸附到真实牌号
 scripts/run_all.py        三级一步跑完；viewer.py / live.py 浏览器里实时看；layout_png.py 叠回原图
 scripts/cv_session.py     CODE V COM 薄封装（Windows + CODE V + pywin32）
+restore/                  还原优化器：按官方 MTF 反求玻璃牌号 / 非球面 / 后截距，出 CODE V 交付件（见 restore/README.md）
 SKILL.md                  完整流程、算法说明、踩过的坑（也是一个 Claude skill）
 examples/demo/            合成示例 + 往返精度自测
 examples/sigma85/         真实案例：适马 85mm F1.2
 examples/zhongyi35_cn120215088/  专利还原：中一 35mm F1.4，专利缺非球面系数 → 图测初值 → CODE V → 人工修正
+examples/sigma50cl/       还原优化器实例：适马 50mm F1.4 CL DG，贴合官方 MTF 求出全模压方案
 ```
 
 `SKILL.md` 本身是一个 [Claude Code](https://claude.com/claude-code) skill：把整个目录放进
@@ -124,6 +126,27 @@ python scripts/viewer.py <目录>     # http://localhost:8765 实时看
 - 只做 INF。
 
 见 SKILL.md §7。
+
+## 还原优化器（restore/）
+
+结构图只给几何。`restore/` 把几何锁定在图上，求剩下的量：
+
+- 每片的真实牌号；
+- 非球面系数；
+- 后截距。
+
+目标是贴合厂商官方 MTF 图，同时满足 EFL、CRA、相对照度等交付条件，最后出 CODE V 交付件。
+
+- 仿 CODE V AUT 的阻尼最小二乘：拉格朗日乘子精确约束、有效集、自动阻尼、自动微分；
+- 玻璃图：模压片用 CODE V 式凸包，抛光片用多边形；
+- 从虚构玻璃到真实牌号：退火吸附 → 逐片冻结 → 精修 → 单片换料；
+- 成批并行：Rust 引擎（CPU 多线程）或 PyTorch（CPU / CUDA）；搜索不需要 CODE V，复核和交付用 CODE V；
+- 一个 `config.json` 描述一支镜头，`tools/config_from_seq.py` 从起始 `.seq` 起草。
+
+```bash
+python restore/run_pipeline.py --config examples/sigma50cl/config.json --out runs/sigma50 --codev
+```
+见 [`restore/README.md`](restore/README.md) 和 [`examples/sigma50cl/`](examples/sigma50cl/)。
 
 ## 局限
 

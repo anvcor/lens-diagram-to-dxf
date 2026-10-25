@@ -1,0 +1,318 @@
+{
+ "name": "Sigma50F14CL",
+ "title": "SIGMA 50mm F1.4 CL DG | C (C027)",
+ "note": "geometry: official Sigma construction SVG (1 unit = 1 mm), cross-checked on a published cutaway; L4 = FLD = FCD100 (given)",
+ "wavelengths_nm": [
+  656.3,
+  587.6,
+  546.1,
+  486.1,
+  435.8
+ ],
+ "ref_wavelength_index": 2,
+ "weights": [
+  3,
+  30,
+  22,
+  10,
+  3
+ ],
+ "surfaces": [
+  {
+   "name": "S1",
+   "z": 92.725,
+   "R": 44.694,
+   "cir": 19.9,
+   "glass_after": "L1",
+   "asph": "var"
+  },
+  {
+   "name": "S2",
+   "z": 97.425,
+   "R": 114.822,
+   "cir": 19.4
+  },
+  {
+   "name": "S3",
+   "z": 98.675,
+   "R": 31.102,
+   "cir": 16.8,
+   "glass_after": "L2"
+  },
+  {
+   "name": "S4",
+   "z": 106.325,
+   "R": 298.739193,
+   "cir": 16.8,
+   "asph": [
+    -4.107615e-06,
+    2.156182e-09,
+    2.02655e-12,
+    0.0
+   ]
+  },
+  {
+   "name": "S5",
+   "z": 107.125,
+   "R": 47.04,
+   "cir": 15.55,
+   "glass_after": "L3"
+  },
+  {
+   "name": "S6",
+   "z": 110.625,
+   "R": 16.831,
+   "cir": 11.6
+  },
+  {
+   "name": "BAF",
+   "z": 115.41,
+   "R": 0,
+   "cir": 99.0,
+   "solver_only": true,
+   "comment": "flare-stop plane in the barrel; 99 = not clipping (glass-extent apertures); measured retainer value 11.19"
+  },
+  {
+   "name": "STO",
+   "z": 117.685,
+   "R": 0,
+   "cir": 10.7,
+   "stop": true
+  },
+  {
+   "name": "S7",
+   "z": 120.725,
+   "R": -34.822,
+   "cir": 11.8,
+   "glass_after": "L4"
+  },
+  {
+   "name": "S8",
+   "z": 124.275,
+   "R": -19.998,
+   "cir": 12.25,
+   "glass_after": "L5"
+  },
+  {
+   "name": "S9",
+   "z": 125.275,
+   "R": 33.157,
+   "cir": 11.75,
+   "glass_after": "L6"
+  },
+  {
+   "name": "S10",
+   "z": 131.625,
+   "R": -33.157,
+   "cir": 11.75
+  },
+  {
+   "name": "S11",
+   "z": 131.835,
+   "R": 71.883,
+   "cir": 13.1,
+   "glass_after": "L7"
+  },
+  {
+   "name": "S12",
+   "z": 139.535,
+   "R": -38.974,
+   "cir": 13.4,
+   "glass_after": "L8"
+  },
+  {
+   "name": "S13",
+   "z": 140.935,
+   "R": 120.69,
+   "cir": 13.65,
+   "asph": "var"
+  },
+  {
+   "name": "S14",
+   "z": 142.695,
+   "R": -190.966,
+   "cir": 14.1,
+   "glass_after": "L9"
+  },
+  {
+   "name": "S15",
+   "z": 143.695,
+   "R": 60.219,
+   "cir": 14.1
+  }
+ ],
+ "elements": {
+  "L1": "var",
+  "L2": "var",
+  "L3": "var",
+  "L4": "HOYA:FCD100",
+  "L5": "var",
+  "L6": "var",
+  "L7": "var",
+  "L8": "var",
+  "L9": "var"
+ },
+ "asph_var": {
+  "S1": {
+   "c_range": [
+    0.014285714285714285,
+    0.03333333333333333
+   ],
+   "sag_table": {
+    "2.0": 0.0448,
+    "3.0": 0.1008,
+    "4.0": 0.1793,
+    "5.0": 0.2802,
+    "6.0": 0.4036,
+    "7.0": 0.5493,
+    "8.0": 0.7168,
+    "9.0": 0.9055,
+    "10.0": 1.1147,
+    "11.0": 1.3432,
+    "12.0": 1.5895,
+    "13.0": 1.852,
+    "14.0": 2.1287,
+    "15.0": 2.4179,
+    "16.0": 2.7177,
+    "17.0": 3.0269,
+    "18.0": 3.3451,
+    "19.0": 3.6731,
+    "19.9": 3.979
+   },
+   "random_R": [
+    41,
+    49
+   ]
+  },
+  "S13": {
+   "c_range": [
+    -0.025,
+    0.025
+   ],
+   "sag_table": {
+    "2.0": 0.0167,
+    "3.0": 0.0382,
+    "4.0": 0.0691,
+    "5.0": 0.1103,
+    "6.0": 0.1628,
+    "7.0": 0.2281,
+    "8.0": 0.3075,
+    "9.0": 0.4029,
+    "10.0": 0.5169,
+    "11.0": 0.6527,
+    "12.0": 0.8149,
+    "13.0": 1.0103,
+    "13.65": 1.159
+   },
+   "random_R": [
+    80,
+    250
+   ]
+  }
+ },
+ "sag_band": {
+  "tol": 0.035,
+  "edge_tol": 0.01,
+  "hmin": 3.0,
+  "comment": "S1/S13 drawn as kinked Beziers in the SVG -> measured on the cutaway raster (validated +-0.025 mm)"
+ },
+ "image": {
+  "cover_glass": {
+   "thickness": 2.5,
+   "glass": "HOYA:BSC7",
+   "gap": 1.0
+  },
+  "back_gap_range": [
+   14.5,
+   18.5
+  ],
+  "back_gap_random": [
+   15.7,
+   17.0
+  ],
+  "image_height": 21.6,
+  "fields_mm": [
+   0.0,
+   2.5,
+   5.0,
+   7.5,
+   10.0,
+   12.5,
+   15.0,
+   17.5,
+   20.0,
+   21.6
+  ],
+  "flange": "L-mount 20.00 mm; last surface to image (physical) 19.63 mm"
+ },
+ "aperture": {
+  "fno": 1.46
+ },
+ "targets": {
+  "mtf_file": "mtf_official.json",
+  "mtf_key": "geometric",
+  "freqs": [
+   10,
+   30
+  ],
+  "w_mtf": 50.0,
+  "w_spot": 0.25,
+  "comment": "Sigma's official MTF = Zemax geometric MTF without the diffraction limit (checked via ZOS-API)"
+ },
+ "limits": {
+  "efl": [
+   48.9,
+   50.5
+  ],
+  "cra_max": 32.0,
+  "ri_min": 0.21,
+  "vd_max": 72.0,
+  "dz_max": 0.35,
+  "cra_angles_deg": [
+   20.5,
+   21.6,
+   22.5,
+   23.6
+  ]
+ },
+ "glass": {
+  "vendors": [
+   "HOYA",
+   "OHARA"
+  ],
+  "rules": {
+   "default": "polished",
+   "L1": "moulded",
+   "L2": "moulded",
+   "L8": "moulded"
+  },
+  "modes": {
+   "moulded": {},
+   "hybrid": {
+    "L8": "any"
+   }
+  },
+  "comment": "asphere elements: HOYA M- / OHARA L- moulded glass; hybrid = L8 polished glass + resin asphere"
+ },
+ "codev": {
+  "gla": "FCD100_HOYA PCD51_HOYA TAC8_HOYA TAFD65_HOYA FDS16W_HOYA",
+  "asph_R_range": [
+   30,
+   500
+  ],
+  "notes": [
+   "geometry: official Sigma construction SVG (1 unit = 1 mm), cross-checked on the PetaPixel cutaway",
+   "glasses: identified by fitting Sigma's official geometrical MTF chart; L4 = FLD = FCD100"
+  ],
+  "yri_fractions": [
+   0,
+   0.3,
+   0.5,
+   0.7,
+   0.85,
+   1.0
+  ],
+  "rdy_tol": 0.05,
+  "title": "SIGMA 50mm F1.4 CL DG | C (C027) - restoration from official CAD, INF"
+ }
+}
